@@ -5,12 +5,11 @@
 
 {% block page_content %}
 <div class="page-header">
-    <h1>Hello, {% if name %}{{ name }}{% else %}Stranger{% endif %}!</h1>
-    {% if not known %}
-    <p>Pleased to meet you!</p>
+    {% if current_user.is_authenticated %}
+    <p>Pleased to meet you {{ current_user.username }}</p>
     {% else %}
-    <p>Happy to see you again!</p>
+    <p>Anonymous</p>
     {% endif %}
 </div>
-{{ wtf.quick_form(form) }}
+<a class="navbar-brand" href="{{ url_for('auth.login') }}">Login</a>
 {% endblock %}
