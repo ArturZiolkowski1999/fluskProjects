@@ -16,7 +16,7 @@ def login():
         if user is not None and user.verify_password(form.password.data):
             login_user(user, form.remember_me.data)
             next = request.args.get('next')
-            if next is None or not next.startswth('/'):
+            if next is None or not next.startswith('/'):
                 next = url_for('main.index')
             return redirect(next)
         flash('Incorrect password or user name')
@@ -62,9 +62,11 @@ def confirm(token):
 
 @auth.before_app_request
 def before_request():
-    if current_user.is_authenticated and not current_user.confirmed \
-            and request.blueprint != 'auth' and request.endpoint != 'static':
-        return redirect(url_for('auth.unconfirmed'))
+    if current_user.is_authenticated:
+        current_user.ping()
+        if not current_user.confirmed \
+                and request.blueprint != 'auth' and request.endpoint != 'static':
+            return redirect(url_for('auth.unconfirmed'))
 
 
 @auth.route('/unconfirmed')

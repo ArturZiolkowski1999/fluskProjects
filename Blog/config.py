@@ -9,11 +9,11 @@ class Config:
     MAIL_PORT = 465
     MAIL_USE_TLS = False
     MAIL_USE_SSL = True
-    MAIL_USERNAME = 'user@gmail.com'
-    MAIL_PASSWORD = 'password'
+    MAIL_USERNAME = 'aaartiii99@gmail.com'
+    MAIL_PASSWORD = ''
     FLASKY_MAIL_SUBJECT_PREFIX = '[activation message]'
-    FLASKY_MAIL_SENDER = 'user@gmail.com'
-    FLASKY_ADMIN = os.environ.get('FLASKY_ADMIN')
+    FLASKY_MAIL_SENDER = 'aaartiii99@gmail.com'
+    FLASKY_ADMIN = 'aaartiii99@gmail.com'
     SSL_REDIRECT = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
