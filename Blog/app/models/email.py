@@ -6,6 +6,7 @@ from app import mail
 
 def send_async_email(app, msg):
     with app.app_context():
+        print('mail sent')
         mail.send(msg)
 
 

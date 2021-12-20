@@ -7,7 +7,7 @@ from flask_migrate import Migrate
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 migrate = Migrate(app, db)
 if __name__ == "__main__":
-    app.run()
+    app.run(host="", port=5000)
 
 
 @app.shell_context_processor
