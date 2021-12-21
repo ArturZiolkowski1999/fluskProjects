@@ -16,6 +16,7 @@ class Config:
     FLASKY_ADMIN = 'aaartiii99@gmail.com'
     SSL_REDIRECT = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    UPLOADED_PHOTOS_DEST = '/home/ziolko/fluskProjects/Blog/app/static'
 
     @staticmethod
     def init_app(app):
@@ -43,6 +44,5 @@ config = {
     'development': DevelopmentConfig,
     'testing': TestingConfig,
     'production': ProductionConfig,
-
     'default': DevelopmentConfig
 }

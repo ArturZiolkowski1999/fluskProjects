@@ -1,5 +1,6 @@
 from flask import render_template, redirect, url_for, request, flash
 from app import db
+import os
 from . import auth
 from .. import main
 from ..models.email import send_email
@@ -43,6 +44,7 @@ def register():
         send_email(user.email, "verify your account",
                    'auth/email/confirm', user=user, token=token)
         flash('on your email we sent verification message')
+        os.mkdir('/home/ziolko/fluskProjects/Blog/app/static/' + user.username)
         return redirect(url_for('auth.login'))
     return render_template('auth/register.html', form=form)
 
