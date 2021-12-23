@@ -7,7 +7,7 @@ from flask_login import UserMixin, AnonymousUserMixin
 from .. import login_manager
 
 
-@login_manager.user_loader 
+@login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
@@ -29,7 +29,7 @@ class Role(db.Model):
         return '<Role %r>' % self.name
 
     def has_permission(self, perm):
-        return (self.permission & perm) == perm
+        return self.permission & perm == perm
 
     def add_permission(self, perm):
         if not self.has_permission(perm):
@@ -72,6 +72,13 @@ class Permission:
     ADMIN = 16
 
 
+class Follow(db.Model):
+    __tablename__ = 'follows'
+    follower_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    followed_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -85,6 +92,13 @@ class User(UserMixin, db.Model):
     about_me = db.Column(db.Text())
     member_since = db.Column(db.DateTime(), default=datetime.datetime.utcnow)
     last_seen = db.Column(db.DateTime(), default=datetime.datetime.utcnow)
+    posts = db.relationship('Post', backref='author', lazy='dynamic')
+    followed = db.relationship('Follow', foreign_keys=[Follow.follower_id],
+                               backref=db.backref('follower', lazy='joined'), lazy='dynamic',
+                               cascade='all, delete-orphan')
+    followers = db.relationship('Follow', foreign_keys=[Follow.followed_id],
+                                backref=db.backref('followed', lazy='joined'), lazy='dynamic',
+                                cascade='all, delete-orphan')
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
@@ -116,7 +130,7 @@ class User(UserMixin, db.Model):
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    def generate_confirmation_token(self,expiration=3600):
+    def generate_confirmation_token(self, expiration=3600):
         s = Serializer(current_app.config['SECRET_KEY'], expiration)
         return s.dumps({'confirm': self.id}).decode('utf-8')
 
@@ -134,6 +148,15 @@ class User(UserMixin, db.Model):
 
     def __repr__(self):
         return '<User %r>' % self.username
+
+
+class Post(db.Model):
+    __tablename__ = 'posts'
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.datetime.utcnow)
+    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    picture_path = db.Column(db.String(128), unique=True, index=True)
 
 
 class AnonymousUser(AnonymousUserMixin):

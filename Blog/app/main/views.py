@@ -1,18 +1,33 @@
-from flask import render_template, redirect, url_for, request, flash
+from flask import render_template, redirect, url_for, request, flash, current_app
 import os
 from flasky import db
 from werkzeug import secure_filename
 from . import main
 from .forms import EditProfileForm, EditProfileAdminForm, PictureForm
-from ..models.models import User, Role
+from ..models.models import User, Role, Permission, Post
 from flask_login import login_user, logout_user, login_required, current_user
 from ..models.decorators import admin_required
 from ..models.photos import photos
 
 
-@main.route("/")
+@main.route("/", methods=['GET', 'POST'])
 def index():
-    return render_template('index.html')
+    form = PictureForm()
+    if form.validate_on_submit() and current_user.can(Permission.WRITE):
+        filename = secure_filename(form.photo.data.filename)
+        form.photo.data.save('/home/ziolko/fluskProjects/Blog/app/static/' + current_user.username + '/' + filename)
+        flash('photo has been sent')
+        post = Post(body=form.body.data, author=current_user._get_current_object(),
+                    picture_path='/static/' + current_user.username + '/' + filename)
+
+        db.session.add(post)
+        db.session.commit()
+        return redirect(url_for('.index'))
+    page = request.args.get('page', 1, type=int)
+    pagination = Post.query.order_by(Post.timestamp.desc()).paginate(
+       page, per_page=current_app.config['POST_PER_PAGE'], error_out=False)
+    posts = pagination.items
+    return render_template('index.html', form=form, posts=posts, pagination=pagination)
 
 
 @main.errorhandler(404)
@@ -33,7 +48,8 @@ def internal_server_error(e):
 @main.route('/user/<username>')
 def user(username):
     user = User.query.filter_by(username=username).first_or_404()
-    return render_template('user.html', user=user)
+    posts = user.posts.order_by(Post.timestamp.desc()).all()
+    return render_template('user.html', user=user, posts=posts)
 
 
 @main.route('/edit-profile', methods=['GET', 'POST'])
@@ -61,7 +77,7 @@ def edit_profile_admin(id):
     user = User.query.get_or_404(id)
     form = EditProfileAdminForm(user=user)
     if form.validate_on_submit():
-        os.rename(('/home/ziolko/fluskProjects/Blog/app/static/' + current_user.username),
+        os.rename(('/home/ziolko/fluskProjects/Blog/app/static/' + User.query.filter_by(id=id).first().username),
                   ('/home/ziolko/fluskProjects/Blog/app/static/' + form.username.data))
         user.email = form.email.data
         user.username = form.username.data
@@ -94,3 +110,9 @@ def upload_picture():
         flash('photo has been sent')
         return redirect(url_for('.user', username=current_user.username))
     return render_template('upload_picture.html', form=form)
+
+
+@main.route('/post/<int:id>')
+def post(id):
+    post = Post.query.get_or_404(id)
+    return render_template('post.html', posts=[post])

@@ -44,5 +44,6 @@ class EditProfileAdminForm(FlaskForm):
 
 
 class PictureForm(FlaskForm):
+    body = TextAreaField("About your mem", validators=[DataRequired()])
     photo = FileField(validators=[FileAllowed(photos, 'Images only'), FileRequired("File is required")])
-    submit = SubmitField('Upload')
+    submit = SubmitField('Send')
