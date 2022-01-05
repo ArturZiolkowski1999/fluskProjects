@@ -47,3 +47,10 @@ class PictureForm(FlaskForm):
     body = TextAreaField("About your mem", validators=[DataRequired()])
     photo = FileField(validators=[FileAllowed(photos, 'Images only'), FileRequired("File is required")])
     submit = SubmitField('Send')
+
+
+class CommentForm(FlaskForm):
+    body = StringField('Comment', validators=[DataRequired()])
+    submit = SubmitField('Send')
+
+

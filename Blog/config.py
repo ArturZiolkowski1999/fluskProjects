@@ -18,6 +18,8 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     UPLOADED_PHOTOS_DEST = '/home/ziolko/fluskProjects/Blog/app/static'
     POST_PER_PAGE = 2
+    FOLLOWERS_PER_PAGE = 2
+    COMMENTS_PER_PAGE = 4
 
     @staticmethod
     def init_app(app):
