@@ -30,21 +30,6 @@ def index():
     return render_template('index.html', form=form, posts=posts, pagination=pagination)
 
 
-@main.errorhandler(404)
-def page_not_found(e):
-    return render_template('404.html', 404)
-
-
-@main.errorhandler(403)
-def permission_denied(e):
-    return render_template('403.html', 403)
-
-
-@main.errorhandler(500)
-def internal_server_error(e):
-    return render_template('500.html', 500)
-
-
 @main.route('/user/<username>')
 def user(username):
     user = User.query.filter_by(username=username).first_or_404()

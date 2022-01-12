@@ -7,6 +7,8 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from app import db
 from flask_login import UserMixin, AnonymousUserMixin
 from .. import login_manager
+from flask import url_for
+from app.exceptions import ValidationError
 
 
 @login_manager.user_loader
@@ -190,6 +192,22 @@ class Post(db.Model):
         target.body_html = bleach.linkify(bleach.clean(
             markdown(value, output_format='html'),
             tags=allowed_tags, strip=True))
+
+    def to_json(self):
+        json_post = {
+            'url': url_for('api.get_post', id=self.id),
+            'body': self.body,
+            'timestamp': self.timestamp,
+            'comment_count': self.comments.count()
+        }
+        return json_post
+
+    @staticmethod
+    def from_json(json_post):
+        body = json_post.get('body')
+        if body is None or body == '':
+            raise ValidationError('Post has no content')
+        return Post(body=body)
 
 
 db.event.listen(Post.body, 'set', Post.on_changed_body)
